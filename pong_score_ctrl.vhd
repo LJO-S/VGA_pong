@@ -18,11 +18,13 @@ end entity;
 
 architecture rtl of pong_score_ctrl is
 
-    constant c_SCORE_X : integer := c_GAME_WIDTH/2;
-    constant c_SCORE_Y : integer := 1;
+    constant c_SCORE_X_LEFT  : integer := c_GAME_WIDTH/2;
+    constant c_SCORE_X_RIGHT : integer := c_SCORE_X_LEFT + 1;
+    constant c_SCORE_Y_TOP   : integer := 1;
+    constant c_SCORE_Y_BOT   : integer := c_SCORE_Y_TOP + 4;
 
-    signal w_col_count_div_LARGE : std_logic_vector(5 downto 0); -- 40
-    signal w_row_count_div_LARGE : std_logic_vector(5 downto 0); -- 30
+    signal w_col_count_div : std_logic_vector(5 downto 0); -- 40
+    signal w_row_count_div : std_logic_vector(5 downto 0); -- 30
 
     signal w_col_addr : std_logic_vector(2 downto 0) := (others => '0'); -- 0-7 X
     signal w_row_addr : std_logic_vector(3 downto 0) := (others => '0'); -- 0-15 Y
@@ -33,36 +35,40 @@ architecture rtl of pong_score_ctrl is
     signal r_ROM_addr : std_logic_vector(7 downto 0) := (others => '0');
     signal r_ROM_data : std_logic_vector(7 downto 0) := (others => '0');
 
+    signal r_bit_addr  : std_logic_vector(2 downto 0) := (others => '0');    
     signal r_bit_draw : std_logic := '0';
 
 begin
-    w_col_count_div_LARGE <= i_col_count(i_col_count'left downto 4);
-    w_row_count_div_LARGE <= i_row_count(i_row_count'left downto 4);
+    -- Tile scaling: 1:16
+    -- Each pixel becomes 16 pixels in X/Y
+    w_col_count_div <= i_col_count(i_col_count'left downto 4);
+    w_row_count_div <= i_row_count(i_row_count'left downto 4);
 
+    -- Tile scaling addresses: 1:4
+    -- Each pixel becomes 4 pixels in X/Y
     w_col_addr <= i_col_count(4 downto 2);
     w_row_addr <= i_row_count(5 downto 2);
 
-    w_score_active <= '1' when (unsigned(w_col_count_div_LARGE) = c_SCORE_X and unsigned(w_row_count_div_LARGE) = c_SCORE_Y) else
-        '0';
+    w_score_active <= '1' when (unsigned(w_col_count_div) >= c_SCORE_X_LEFT) and
+                               (unsigned(w_col_count_div) <= c_SCORE_X_RIGHT) and
+                               (unsigned(w_row_count_div) >= c_SCORE_Y_TOP) and
+                               (unsigned(w_row_count_div) <= c_SCORE_Y_BOT) else
+                               '0';
 
     -- PROCESS DRAW
     p_draw_score : process (i_CLK)
     begin
         if rising_edge(i_CLK) then
             if (w_score_active = '1') then
-
+                r_bit_draw <= r_ROM_data(to_integer(not unsigned(w_col_addr)));
             else
-                -- bla bla
+                r_bit_draw <= '0';
             end if;
         end if;
     end process;
 
-
-
-
-
-
     -- PROCESS access ROM
+    -- 1:1 tile scaling = 8x16 ROM 
     p_access_ROM : process (i_CLK)
     begin
         if rising_edge(i_CLK) then
@@ -244,5 +250,8 @@ begin
             end case;
         end if;
     end process;
+
+
+    o_draw_score <= r_bit_draw;
 
 end architecture;
