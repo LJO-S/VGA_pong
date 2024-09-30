@@ -8,7 +8,7 @@ package pong_pkg is
     constant c_PADEL_SPEED    : integer := 250_000; -- 1 tile movement every 10 ms 
     constant c_PADEL_HEIGHT   : integer := 3;
 
-    constant c_BALL_SPEED : integer := 250_000;
+    constant c_BALL_SPEED : integer := 500_000;
 
     constant c_SCORE_LIMIT : integer := 10;
     
