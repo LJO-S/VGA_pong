@@ -6,16 +6,14 @@ library work;
 use work.pong_pkg.all;
 
 entity pong_top is
-    generic
-    (
+    generic (
         g_VIDEO_WIDTH : integer;
         g_TOTAL_COLS  : integer;
         g_TOTAL_ROWS  : integer;
         g_ACTIVE_COLS : integer;
         g_ACTIVE_ROWS : integer
     );
-    port
-    (
+    port (
         i_CLK   : in std_logic; -- 25 MHz 
         i_HSYNC : in std_logic;
         i_VSYNC : in std_logic;
@@ -57,6 +55,8 @@ architecture arch of pong_top is
 
     signal w_draw_WALL : std_logic;
 
+    signal w_draw_SCORE : std_logic;
+
     signal w_draw_ANY : std_logic := '0';
 
     signal w_game_active : std_logic := '0';
@@ -66,16 +66,16 @@ architecture arch of pong_top is
     signal w_wall_Y_top  : unsigned(5 downto 0) := (others => '0');
     signal w_wall_Y_bot  : unsigned(5 downto 0) := (others => '0');
 
+    signal w_WALL_score : std_logic_vector(3 downto 0)     := (others => '0');
     signal r_WALL_score : integer range 0 to c_SCORE_LIMIT := 0;
 
 begin
     ------------------------------------------------------------------------------------------
     VGA_sync_to_count_INST : entity work.VGA_sync_to_count
-        generic
-        map
+        generic map
         (
-        g_TOTAL_COLS => g_TOTAL_COLS,
-        g_TOTAL_ROWS => g_TOTAL_ROWS
+            g_TOTAL_COLS => g_TOTAL_COLS,
+            g_TOTAL_ROWS => g_TOTAL_ROWS
         )
         port map
         (
@@ -104,44 +104,56 @@ begin
     ------------------------------------------------------------------------------------------
     -- instantiate player draw
     pong_padel_ctrl_INST : entity work.pong_padel_ctrl
-    generic
-    map (
-    g_PLAYER_PADEL_X => c_PLAYER_PADEL_X
-    )
-    port
-    map (
-    i_CLK           => i_CLK,
-    i_UP            => i_UP,
-    i_DOWN          => i_DOWN,
-    i_col_count_div => w_col_count_div,
-    i_row_count_div => w_row_count_div,
-    o_draw_padel    => w_draw_PADEL,
-    o_padel_Y       => w_padel_Y
-    );
+        generic map(
+            g_PLAYER_PADEL_X => c_PLAYER_PADEL_X
+        )
+        port map
+        (
+            i_CLK           => i_CLK,
+            i_UP            => i_UP,
+            i_DOWN          => i_DOWN,
+            i_col_count_div => w_col_count_div,
+            i_row_count_div => w_row_count_div,
+            o_draw_padel    => w_draw_PADEL,
+            o_padel_Y       => w_padel_Y
+        );
     ------------------------------------------------------------------------------------------
 
     -- inst wall draw
     pong_wall_ctrl_INST : entity work.pong_wall_ctrl
-    port
-    map (
-    i_CLK           => i_CLK,
-    i_row_count_div => w_row_count_div,
-    i_col_count_div => w_col_count_div,
-    o_draw_wall     => w_draw_WALL
-    );
+        port map
+        (
+            i_CLK           => i_CLK,
+            i_row_count_div => w_row_count_div,
+            i_col_count_div => w_col_count_div,
+            o_draw_wall     => w_draw_WALL
+        );
     ------------------------------------------------------------------------------------------
     -- inst ball draw
     pong_ball_ctrl_INST : entity work.pong_ball_ctrl
-    port
-    map (
-    i_CLK           => i_CLK,
-    i_game_active   => w_game_active,
-    i_col_count_div => w_col_count_div,
-    i_row_count_div => w_row_count_div,
-    o_draw_ball     => w_draw_BALL,
-    o_ball_X        => w_ball_X,
-    o_ball_Y        => w_ball_Y
-    );
+        port map
+        (
+            i_CLK           => i_CLK,
+            i_game_active   => w_game_active,
+            i_col_count_div => w_col_count_div,
+            i_row_count_div => w_row_count_div,
+            o_draw_ball     => w_draw_BALL,
+            o_ball_X        => w_ball_X,
+            o_ball_Y        => w_ball_Y
+        );
+    ------------------------------------------------------------------------------------------
+    -- inst score ctrl
+    pong_score_ctrl_inst : entity work.pong_score_ctrl
+        port map
+        (
+            i_CLK        => i_CLK,
+            i_score_wall => w_WALL_score,
+            i_col_count  => w_col_count,
+            i_row_count  => w_row_count,
+            o_draw_score => w_draw_SCORE
+        );
+
+    w_WALL_score <= std_logic_vector(TO_UNSIGNED(r_WALL_score, w_WALL_score'length));
     ------------------------------------------------------------------------------------------
     -- create top/bottom-boundaries
     w_padel_Y_bot <= unsigned(w_padel_Y);
@@ -172,10 +184,10 @@ begin
                     ------------------------------------------------------------------------------
                 when t_WALL_WINS =>
                     STATE <= t_CLEANUP;
-                    if (r_WALL_score = c_SCORE_LIMIT) then
-                        r_WALL_score <= 0;
+                    if (r_WALL_score = 0) then
+                        r_WALL_score <= c_SCORE_LIMIT;
                     else
-                        r_WALL_score <= r_WALL_score + 1;
+                        r_WALL_score <= r_WALL_score - 1;
                     end if;
                     ------------------------------------------------------------------------------
                 when t_CLEANUP =>
@@ -193,7 +205,7 @@ begin
         '0';
 
     -- big OR
-    w_draw_ANY <= w_draw_BALL or w_draw_PADEL or w_draw_WALL;
+    w_draw_ANY <= w_draw_BALL or w_draw_PADEL or w_draw_WALL or w_draw_SCORE;
 
     -- Color assignments. 
     -- Specific color combinations for different entities can be set here.

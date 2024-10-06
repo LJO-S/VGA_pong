@@ -29,7 +29,6 @@ architecture rtl of pong_padel_ctrl is
     signal w_row_index : natural range 0 to (2 ** i_row_count_div'length) := 0;
 
     signal r_padel_count    : natural range 0 to c_PADEL_SPEED := 0;
-    signal w_padel_count_en : std_logic;
 
     -- Start location of padel
     signal r_padel_Y : natural range 0 to (c_GAME_HEIGHT - c_PADEL_HEIGHT - 1) := (c_GAME_HEIGHT - c_PADEL_HEIGHT - 1)/2;
