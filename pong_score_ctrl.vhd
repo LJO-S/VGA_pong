@@ -6,8 +6,7 @@ library work;
 use work.pong_pkg.all;
 
 entity pong_score_ctrl is
-    port
-    (
+    port (
         i_CLK        : in std_logic;
         i_score_wall : in std_logic_vector(3 downto 0);
         i_col_count  : in std_logic_vector(9 downto 0);
@@ -31,9 +30,9 @@ architecture rtl of pong_score_ctrl is
     signal w_score_active  : std_logic;
 
     signal r_score_wall : std_logic_vector(i_score_wall'left downto 0) := (others => '0');
-    signal r_ROM_addr   : std_logic_vector(7 downto 0)                 := (others => '0');
     signal r_ROM_data   : std_logic_vector(7 downto 0)                 := (others => '0');
     signal r_bit_draw   : std_logic                                    := '0';
+    signal r_ROM_addr   : std_logic_vector(7 downto 0);
 
 begin
     -- Tile scaling: 1:16
