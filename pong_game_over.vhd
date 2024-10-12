@@ -114,9 +114,9 @@ begin
             case r_ROM_addr is
                     -- G
                 when x"010" => r_ROM_data <= "00000000";
-                when x"011" => r_ROM_data <= "00111000";
-                when x"012" => r_ROM_data <= "01000100";
-                when x"013" => r_ROM_data <= "11000110";
+                when x"011" => r_ROM_data <= "00000000";
+                when x"012" => r_ROM_data <= "00111000";
+                when x"013" => r_ROM_data <= "01000100";
                 when x"014" => r_ROM_data <= "11000110";
                 when x"015" => r_ROM_data <= "11000000";
                 when x"016" => r_ROM_data <= "11011110";
@@ -149,16 +149,16 @@ begin
                     -- M
                 when x"040" => r_ROM_data <= "00000000";
                 when x"041" => r_ROM_data <= "00000000";
-                when x"042" => r_ROM_data <= "11000011";
-                when x"043" => r_ROM_data <= "11100111";
-                when x"044" => r_ROM_data <= "11011011";
-                when x"045" => r_ROM_data <= "11000011";
-                when x"046" => r_ROM_data <= "11000011";
-                when x"047" => r_ROM_data <= "11000011";
-                when x"048" => r_ROM_data <= "11000011";
-                when x"049" => r_ROM_data <= "11000011";
-                when x"04A" => r_ROM_data <= "11000011";
-                when x"04B" => r_ROM_data <= "11000011";
+                when x"042" => r_ROM_data <= "11000110";
+                when x"043" => r_ROM_data <= "11101110";
+                when x"044" => r_ROM_data <= "11010110";
+                when x"045" => r_ROM_data <= "11000110";
+                when x"046" => r_ROM_data <= "11000110";
+                when x"047" => r_ROM_data <= "11000110";
+                when x"048" => r_ROM_data <= "11000110";
+                when x"049" => r_ROM_data <= "11000110";
+                when x"04A" => r_ROM_data <= "11000110";
+                when x"04B" => r_ROM_data <= "11000110";
                 when x"04C" => r_ROM_data <= "00000000";
                 when x"04D" => r_ROM_data <= "00000000";
                 when x"04E" => r_ROM_data <= "00000000";
