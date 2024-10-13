@@ -2,10 +2,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
--- TODO: 
--- 1. Fix counter strobing at 2 Hz
--- 2. Fix letter ON/OFF constants
--- 3. Fix ROM
 entity pong_game_over is
     port (
         i_CLK : in std_logic;
