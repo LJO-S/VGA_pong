@@ -295,8 +295,8 @@ begin
                 when x"86" => r_ROM_data <= "00110000";
                 when x"87" => r_ROM_data <= "00110000";
                 when x"88" => r_ROM_data <= "00110000";
-                when x"89" => r_ROM_data <= "00110000";
-                when x"8A" => r_ROM_data <= "00000000";
+                when x"89" => r_ROM_data <= "00000000";
+                when x"8A" => r_ROM_data <= "00110000";
                 when x"8B" => r_ROM_data <= "00110000";
                 when x"8C" => r_ROM_data <= "00000000";
                 when x"8D" => r_ROM_data <= "00000000";
