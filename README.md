@@ -3,6 +3,6 @@ Based on Nandland's Pong (https://nandland.com/project-10-pong/) but implemented
 
 
 ## TODO:
--- Slow padel down.
--- Change padel position
--- Create TCL script to build project
+# Slow paddle down.
+# Change paddle position
+# Create TCL script to build project
