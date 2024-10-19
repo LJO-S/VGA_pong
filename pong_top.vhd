@@ -33,7 +33,7 @@ entity pong_top is
 end pong_top;
 
 architecture arch of pong_top is
-    type t_STATE is (t_IDLE, t_RUNNING, t_WALL_WINS, t_CLEANUP);
+    type t_STATE is (t_IDLE, t_RUNNING, t_WALL_WINS, t_GAME_OVER, t_CLEANUP);
     signal STATE : t_STATE := t_IDLE;
 
     signal w_HSYNC : std_logic;
@@ -57,9 +57,12 @@ architecture arch of pong_top is
 
     signal w_draw_SCORE : std_logic;
 
-    signal w_draw_ANY : std_logic := '0';
+    signal w_draw_ANY  : std_logic := '0';
 
     signal w_game_active : std_logic := '0';
+
+    signal w_game_over : std_logic := '0';
+    signal w_draw_GAMEOVER : std_logic := '0';
 
     signal w_padel_Y_bot : unsigned(5 downto 0) := (others => '0');
     signal w_padel_Y_top : unsigned(5 downto 0) := (others => '0');
@@ -67,7 +70,7 @@ architecture arch of pong_top is
     signal w_wall_Y_bot  : unsigned(5 downto 0) := (others => '0');
 
     signal w_WALL_score : std_logic_vector(3 downto 0)     := (others => '0');
-    signal r_WALL_score : integer range 0 to c_SCORE_LIMIT := 0;
+    signal r_WALL_score : integer range 0 to c_SCORE_LIMIT := c_SCORE_LIMIT;
 
 begin
     ------------------------------------------------------------------------------------------
@@ -155,6 +158,18 @@ begin
 
     w_WALL_score <= std_logic_vector(TO_UNSIGNED(r_WALL_score, w_WALL_score'length));
     ------------------------------------------------------------------------------------------
+    -- inst game over
+    pong_game_over_inst : entity work.pong_game_over
+        port map
+        (
+            i_CLK           => i_CLK,
+            i_game_over     => w_game_over,
+            i_col_count     => w_col_count,
+            i_row_count     => w_row_count,
+            o_DRAW_GAMEOVER => w_draw_GAMEOVER
+        );
+
+    ------------------------------------------------------------------------------------------
     -- create top/bottom-boundaries
     w_padel_Y_bot <= unsigned(w_padel_Y);
     w_padel_Y_top <= w_padel_Y_bot + to_unsigned(c_PADEL_HEIGHT, w_padel_Y_top'length);
@@ -183,11 +198,17 @@ begin
                     end if;
                     ------------------------------------------------------------------------------
                 when t_WALL_WINS =>
-                    STATE <= t_CLEANUP;
-                    if (r_WALL_score = 0) then
-                        r_WALL_score <= c_SCORE_LIMIT;
+                    r_WALL_score <= r_WALL_score - 1;
+                    if (r_WALL_score = 1) then
+                        STATE        <= t_GAME_OVER;
                     else
-                        r_WALL_score <= r_WALL_score - 1;
+                        STATE        <= t_CLEANUP;
+                    end if;
+                    ------------------------------------------------------------------------------
+                when t_GAME_OVER =>
+                    if (i_game_start = '1') then
+                        r_WALL_score <= c_SCORE_LIMIT;
+                        STATE <= t_IDLE;
                     end if;
                     ------------------------------------------------------------------------------
                 when t_CLEANUP =>
@@ -203,10 +224,11 @@ begin
     -- concurrent statements
     w_game_active <= '1' when STATE = t_RUNNING else
         '0';
+    w_game_over <= '1' when STATE = t_GAME_OVER else
+        '0';
 
     -- big OR
-    w_draw_ANY <= w_draw_BALL or w_draw_PADEL or w_draw_WALL or w_draw_SCORE;
-
+    w_draw_ANY <= w_draw_BALL or w_draw_PADEL or w_draw_WALL or w_draw_SCORE or w_draw_GAMEOVER;
     -- Color assignments. 
     -- Specific color combinations for different entities can be set here.
     o_RED_VIDEO <= (others => '1') when w_draw_ANY = '1' else
