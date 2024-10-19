@@ -1,5 +1,6 @@
 ## VGA_pong 
-Based on Nandland's Pong (https://nandland.com/project-10-pong/) but implemented on a ZYNQ as a singleplayer game with a visual score.
+The classic pong game but implemented in a singleplayer mode, with 9 lives.
+Based on Nandland's Pong (https://nandland.com/project-10-pong/).
 
 
 ## TODO:
